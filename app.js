@@ -7,7 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let nextRandom = null
     let timerId
     let gameStart = false
-    let score = 0
+    let score
+    let random
+    let current
     const colors = [
       'orange',
       'red',
@@ -59,10 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
     console.log(theTetrominoes[0][0])
   
-    //randomly select a Tetromino and its first rotation
-    let random = Math.floor(Math.random()*theTetrominoes.length)
-    let current = theTetrominoes[random][currentRotation]
-  
     //draw the Tetromino
     function draw() {
       current.forEach(index => {
@@ -82,21 +80,23 @@ document.addEventListener('DOMContentLoaded', () => {
   
     //assign functions to keyCodes
     function control(e) {
-      if(timerId) {
-        if(e.keyCode === 37) {
-          moveLeft()
-        } else if (e.keyCode === 38) {
-          rotate()
-        } else if (e.keyCode === 39) {
-          moveRight()
-        } else if (e.keyCode === 40) {
-          moveDown()
-        } else if (e.keyCode === 32) {
-          while(!moveDown());
+      if(gameStart) {
+        if(timerId) {
+          if(e.keyCode === 37) {
+            moveLeft()
+          } else if (e.keyCode === 38) {
+            rotate()
+          } else if (e.keyCode === 39) {
+            moveRight()
+          } else if (e.keyCode === 40) {
+            moveDown()
+          } else if (e.keyCode === 32) {
+            while(!moveDown());
+          }
         }
-      }
-      if (e.keyCode === 80) {
-        pause()
+        if (e.keyCode === 80) {
+          pause()
+        }
       }
     }
     document.addEventListener('keydown', control)
@@ -222,8 +222,21 @@ document.addEventListener('DOMContentLoaded', () => {
   
     //starts the game on the first press of the start button
     startBtn.addEventListener('click', () => {
-      if (!gameStart) pause()
-      gameStart = true
+      if(!gameStart) {
+        gameStart = true
+        score = 0
+        scoreDisplay.innerHTML = score
+        //randomly select a Tetromino and its first rotation
+        random = Math.floor(Math.random()*theTetrominoes.length)
+        current = theTetrominoes[random][currentRotation]
+        squares.forEach( e => { if(e.classList.contains('tetromino')) {
+                                  e.classList.remove('taken')
+                                  e.classList.remove('tetromino')
+                                  e.style.backgroundColor = ''
+                                }
+        })
+        pause()
+      }
     })
 
     //pause or unpause the game
@@ -266,6 +279,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if(current.some(index => squares[currentPosition + index].classList.contains('taken'))) {
         scoreDisplay.innerHTML = 'end'
         clearInterval(timerId)
+        timerId = null
+        nextRandom = null
+        gameStart = false
       }
     }
   

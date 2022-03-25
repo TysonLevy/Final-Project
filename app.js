@@ -245,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const row = [i, i+1, i+2, i+3, i+4, i+5, i+6, i+7, i+8, i+9]
   
         if(row.every(index => squares[index].classList.contains('taken'))) {
+          undraw()
           score +=10
           scoreDisplay.innerHTML = score
           row.forEach(index => {
@@ -255,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const squaresRemoved = squares.splice(i, width)
           squares = squaresRemoved.concat(squares)
           squares.forEach(cell => grid.appendChild(cell))
+          draw()
         }
       }
     }

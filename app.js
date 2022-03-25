@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const scoreDisplay = document.querySelector('#score')
     const startBtn = document.querySelector('#start-button')
     const width = 10
-    let nextRandom = 0
+    let nextRandom = null
     let timerId
+    let gameStart = false
     let score = 0
     const colors = [
       'orange',
@@ -81,27 +82,36 @@ document.addEventListener('DOMContentLoaded', () => {
   
     //assign functions to keyCodes
     function control(e) {
-      if(e.keyCode === 37) {
-        moveLeft()
-      } else if (e.keyCode === 38) {
-        rotate()
-      } else if (e.keyCode === 39) {
-        moveRight()
-      } else if (e.keyCode === 40) {
-        moveDown()
+      if(timerId) {
+        if(e.keyCode === 37) {
+          moveLeft()
+        } else if (e.keyCode === 38) {
+          rotate()
+        } else if (e.keyCode === 39) {
+          moveRight()
+        } else if (e.keyCode === 40) {
+          moveDown()
+        } else if (e.keyCode === 32) {
+          while(!moveDown());
+        }
+      }
+      if (e.keyCode === 80) {
+        pause()
       }
     }
-    document.addEventListener('keyup', control)
+    document.addEventListener('keydown', control)
   
     //move down function
+    //returns true if the teromino has stopped false otherwise
     function moveDown() {
       undraw()
       currentPosition += width
       draw()
-      freeze()
+      return freeze()
     }
   
-    //freeze function
+    //freeze function 
+    //returns true if the teromino has stopped false otherwise
     function freeze() {
       if(current.some(index => squares[currentPosition + index + width].classList.contains('taken'))) {
         current.forEach(index => squares[currentPosition + index].classList.add('taken'))
@@ -114,7 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
         displayShape()
         addScore()
         gameOver()
+        return true
       }
+      return false
     }
   
     //move the tetromino left, unless is at the edge or there is a blockage
@@ -208,18 +220,24 @@ document.addEventListener('DOMContentLoaded', () => {
       })
     }
   
-    //add functionality to the button
+    //starts the game on the first press of the start button
     startBtn.addEventListener('click', () => {
+      if (!gameStart) pause()
+      gameStart = true
+    })
+
+    //pause or unpause the game
+    function pause(){
       if (timerId) {
         clearInterval(timerId)
         timerId = null
       } else {
         draw()
         timerId = setInterval(moveDown, 1000)
-        nextRandom = Math.floor(Math.random()*theTetrominoes.length)
+        if(!nextRandom) nextRandom = Math.floor(Math.random()*theTetrominoes.length)
         displayShape()
       }
-    })
+    }
   
     //add score
     function addScore() {
